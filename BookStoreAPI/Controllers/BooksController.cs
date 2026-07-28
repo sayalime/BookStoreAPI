@@ -2,6 +2,7 @@
 using BookStoreAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookStoreAPI.Controllers
 {
@@ -18,25 +19,26 @@ namespace BookStoreAPI.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetBooks()
+        public async Task<IActionResult> GetBooks()
+
         {
-            var Books = _db.Books.ToList();
+            var Books = await _db.Books.ToListAsync();
             return Ok(Books);
         }
 
         [HttpPost]
 
-        public IActionResult Addbook(Book book)
+        public async Task<IActionResult> Addbook(Book book)
         {
-            _db.Books.Add(book);
-            _db.SaveChanges();
-            return Ok("Inserted");
+           await  _db.Books.AddAsync(book);
+           await _db.SaveChangesAsync();
+            return CreatedAtAction(nameof (GetBooks), new {id=book.Id},book);
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateBook(int id, Book Updatedvalues)
+        public async Task<IActionResult> UpdateBook(int id, Book Updatedvalues)
         {
-            var books = _db.Books.Find(id);
+            var books = await _db.Books.FindAsync(id);
             if (books == null)
             {
                 return NotFound();
@@ -47,16 +49,16 @@ namespace BookStoreAPI.Controllers
                 books.Author = Updatedvalues.Author;
                 books.Price = Updatedvalues.Price;
 
-                _db.SaveChanges();
+               await _db.SaveChangesAsync();
             }
 
             return Ok("Updated");
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteBook(int id)
+        public async Task<IActionResult> DeleteBook(int id)
         {
-            var book=_db.Books.Find(id);
+            var book=await _db.Books.FindAsync(id);
             if (book == null)
             {
                 return NotFound();
@@ -64,7 +66,7 @@ namespace BookStoreAPI.Controllers
             else
             {
                 _db.Books.Remove(book);
-                _db.SaveChanges();
+                await _db.SaveChangesAsync();
             }
             return NoContent();
         }
