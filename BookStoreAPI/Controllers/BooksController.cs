@@ -22,11 +22,18 @@ namespace BookStoreAPI.Controllers
         public async Task<IActionResult> GetBooks()
 
         {
-            var Books = await _db.Books.ToListAsync();
-            return Ok(Books);
+            try
+            {
+                var Books = await _db.Books.ToListAsync();
+                return Ok(Books);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal Server Error: " + ex.Message);
+            }
         }
 
-        [HttpPost]
+            [HttpPost]
 
         public async Task<IActionResult> Addbook(Book book)
         {
