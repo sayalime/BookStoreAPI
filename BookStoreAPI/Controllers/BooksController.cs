@@ -1,6 +1,9 @@
 ﻿using BookStoreAPI.Data;
+using BookStoreAPI.DTOs;
+using BookStoreAPI.Interfaces;
 using BookStoreAPI.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,72 +13,62 @@ namespace BookStoreAPI.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-        private readonly BookDbContext _db;
+        private readonly IBookService _bookService;
 
-        public BooksController(BookDbContext context)
+        public BooksController(IBookService bookService)
         {
-            _db = context;
+            _bookService = bookService;
 
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetBooks()
+        public async Task<IActionResult> GetAllBooks()
 
         {
-            try
-            {
-                var Books = await _db.Books.ToListAsync();
-                return Ok(Books);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Internal Server Error: " + ex.Message);
-            }
+            var books= await _bookService.GetAllAsync();
+            return Ok(books);
         }
 
-            [HttpPost]
-
-        public async Task<IActionResult> Addbook(Book book)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetBookById(int id)
         {
-           await  _db.Books.AddAsync(book);
-           await _db.SaveChangesAsync();
-            return CreatedAtAction(nameof (GetBooks), new {id=book.Id},book);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBook(int id, Book Updatedvalues)
-        {
-            var books = await _db.Books.FindAsync(id);
-            if (books == null)
+            var book = await _bookService.GetByIdAsync(id);
+            if (book == null)
             {
                 return NotFound();
             }
-            else
+            return Ok(book);
+        }
+
+
+         [HttpPost]
+
+        public async Task<IActionResult> Addbook(CreateBookDto bookdto)
+        {
+            var book = await _bookService.AddAsync(bookdto);
+            return Ok(book);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateBook(int id, UpdateBookDto dto)
+        {
+            var book = await _bookService.UpdateAsync(id, dto);
+            if (book == null)
             {
-                books.Title = Updatedvalues.Title;
-                books.Author = Updatedvalues.Author;
-                books.Price = Updatedvalues.Price;
-
-               await _db.SaveChangesAsync();
+                return NotFound();
             }
-
-            return Ok("Updated");
+            return Ok(book);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(int id)
         {
-            var book=await _db.Books.FindAsync(id);
-            if (book == null)
+            var result = await _bookService.DeleteAsync(id);
+            if (!result)
             {
                 return NotFound();
             }
-            else
-            {
-                _db.Books.Remove(book);
-                await _db.SaveChangesAsync();
-            }
-            return NoContent();
+            return Ok("Deleted");
         }
     }
 }

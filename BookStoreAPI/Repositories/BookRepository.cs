@@ -17,7 +17,7 @@ namespace BookStoreAPI.Repositories
             Context = context;
         }
 
-        public async Task<IEnumerable<Book>> GetAllAsync()
+        public async Task<List<Book>> GetAllAsync()
         {
             return await Context.Books.ToListAsync();
         }
@@ -30,20 +30,25 @@ namespace BookStoreAPI.Repositories
         public async Task AddAsync(Book book)
         {
             await Context.Books.AddAsync(book);
+            await Context.SaveChangesAsync();
+
+        }
+
+
+        public async Task UpdateAsync(Book book)
+        {
+             Context.Books.Update(book);
+            await Context.SaveChangesAsync();
+
             
         }
 
-
-        public Task UpdateAsync(Book book)
+        public  async Task DeleteAsync(Book book)
         {
-             Context.Books.Update(book);
-            return Task.CompletedTask;
-        }
+            Context.Books.Remove(book);
+            await Context.SaveChangesAsync();
 
-        public  Task DeleteAsync(Book book)
-        {
-             Context.Books.Remove(book);
-            return Task.CompletedTask;
+
         }
     }
 }

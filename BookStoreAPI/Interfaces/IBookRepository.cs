@@ -5,7 +5,7 @@ namespace BookStoreAPI.Interfaces
     public interface IBookRepository
     {
         //Retrieve all books asynchronously and return them as a collection.
-        public Task<IEnumerable<Book>> GetAllAsync();
+        public Task<List<Book>> GetAllAsync();
 
         public Task<Book?> GetByIdAsync(int id);
 
