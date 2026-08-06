@@ -29,6 +29,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+//Global Exception
+app.UseMiddleware<BookStoreAPI.Middleware.ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
